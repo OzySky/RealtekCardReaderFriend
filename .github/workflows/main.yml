@@ -1,0 +1,34 @@
+name: RealtekCardReader-CI
+
+# Controls when the workflow will run
+on:
+    # Trigger the workflow on push or pull request events 
+    push:
+    pull_request:
+    # Allow to run this workflow manually from the Actions tab
+    workflow_dispatch:
+    # Run the workflow for published releases
+    release:
+        types: [published]
+
+jobs:
+    # Build the kext
+    build:
+        name: Build
+        runs-on: macos-latest
+        steps:
+            # Checkout the card reader repo
+            - uses: actions/checkout@v2
+            # Checkout the MacKernelSDK repo
+            - uses: actions/checkout@v2
+              with:
+                repository: acidanthera/MacKernelSDK
+                path: MacKernelSDK
+            # Build the driver
+            - run: xcodebuild -jobs 3 -configuration Release
+            # Upload the driver
+            - name: Upload to Artifacts
+              uses: actions/upload-artifact@v2
+              with:
+                name: Artifacts
+                path: build/*/*.zip
